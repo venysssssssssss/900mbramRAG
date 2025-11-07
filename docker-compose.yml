@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # Backend service - FastAPI application
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - JINA_API_KEY=${JINA_API_KEY}
+      - GEMINI_GEN_MODEL=${GEMINI_GEN_MODEL:-gemini-1.5-pro}
+      - DB_PATH=/app/data/docs.db
+      - TOP_K=${TOP_K:-3}
+      - MAX_DOCS=${MAX_DOCS:-500}
+    volumes:
+      - ./data:/app/data
+      - ./backend:/app/backend
+      - ./main.py:/app/main.py
+    deploy:
+      resources:
+        limits:
+          memory: 500M
+        reservations:
+          memory: 256M
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rag_network
+
+  # Frontend service - Nginx serving static files
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: rag_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+        reservations:
+          memory: 64M
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - rag_network
+
+networks:
+  rag_network:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local

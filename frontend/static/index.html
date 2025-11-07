@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="description" content="Chat com Documentos - Sistema RAG inteligente para análise de documentos com IA">
+    
+    <title>Chat com Documentos | RAG System</title>
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%236366f1'>💬</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Container Principal -->
+    <div id="app" class="app">
+        
+        <!-- Tela Inicial (Welcome Screen) -->
+        <div id="startScreen" class="start-screen">
+            <div class="start-content">
+                <div class="start-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z"/>
+                    </svg>
+                </div>
+                
+                <h1 class="start-title">Chat com Documentos</h1>
+                <p class="start-subtitle">Converse com seus documentos usando inteligência artificial avançada</p>
+                
+                <div class="start-features">
+                    <div class="start-feature">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12L11 14L15 10"/>
+                            <circle cx="12" cy="12" r="9"/>
+                        </svg>
+                        <span>Upload de múltiplos formatos (PDF, DOCX, TXT, MD)</span>
+                    </div>
+                    <div class="start-feature">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"/>
+                        </svg>
+                        <span>Respostas instantâneas com IA Gemini</span>
+                    </div>
+                    <div class="start-feature">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93"/>
+                        </svg>
+                        <span>Análise contextual precisa com Jina AI</span>
+                    </div>
+                </div>
+                
+                <button id="startBtn" class="btn-primary btn-large">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19"/>
+                    </svg>
+                    Começar Conversa
+                </button>
+            </div>
+        </div>
+        
+        <!-- Interface Principal (Chat + Sidebar) -->
+        <div id="chatScreen" class="chat-screen hidden">
+            
+            <!-- Sidebar de Upload -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                            <path d="M2 17L12 22L22 17"/>
+                            <path d="M2 12L12 17L22 12"/>
+                        </svg>
+                        <span class="logo-text">RAG System</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-content">
+                    <h3 class="section-title">Seus Documentos</h3>
+                    
+                    <!-- Área de Upload com Drag & Drop -->
+                    <div id="uploadArea" class="upload-area">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"/>
+                            <path d="M17 8L12 3L7 8"/>
+                            <path d="M12 3V15"/>
+                        </svg>
+                        <p class="upload-text">Clique ou arraste arquivos</p>
+                        <p class="upload-hint">PDF, DOCX, TXT, MD • Máx 800MB</p>
+                    </div>
+                    
+                    <input type="file" id="fileInput" class="file-input" accept=".pdf,.docx,.txt,.md" multiple>
+                    
+                    <!-- Lista de Arquivos Carregados -->
+                    <div id="filesList" class="files-list"></div>
+                    
+                    <!-- Contador de Arquivos -->
+                    <div class="upload-limit">
+                        <span id="fileCount">0</span>/2 documentos
+                    </div>
+                    
+                    <!-- Botão Limpar -->
+                    <button id="clearBtn" class="btn-clear">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6H5H21"/>
+                            <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"/>
+                        </svg>
+                        Limpar Tudo
+                    </button>
+                </div>
+            </aside>
+            
+            <!-- Área Principal do Chat -->
+            <main class="main-content">
+                
+                <!-- Cabeçalho do Chat -->
+                <header class="chat-header">
+                    <h2 class="chat-title">Conversa com Documentos</h2>
+                    <div class="chat-status">
+                        <span class="status-dot"></span>
+                        <span>Online</span>
+                    </div>
+                </header>
+                
+                <!-- Container de Mensagens -->
+                <div id="messagesContainer" class="messages-container">
+                    <div class="message-date">Hoje</div>
+                    <!-- Mensagens aparecerão aqui dinamicamente -->
+                </div>
+                
+                <!-- Área de Input -->
+                <form id="messageForm" class="input-container">
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="messageInput" 
+                            class="message-input" 
+                            placeholder="Digite sua pergunta sobre os documentos..."
+                            autocomplete="off"
+                            aria-label="Digite sua pergunta"
+                        >
+                        <button type="submit" id="sendBtn" class="btn-send" aria-label="Enviar mensagem">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 2L11 13"/>
+                                <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="input-hint">Pressione Enter para enviar</p>
+                </form>
+                
+            </main>
+        </div>
+        
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loader"></div>
+        <p>Processando...</p>
+    </div>
+    
+    <!-- Toast Container para Notificações -->
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <script src="/js/app.js"></script>
+</body>
+</html>
