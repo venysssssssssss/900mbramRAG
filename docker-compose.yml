@@ -10,12 +10,13 @@ services:
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - /etc/nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - rag_backend
-      - rag_frontend
+      - ./ssl:/etc/nginx/ssl
     networks:
       - rag_network
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
 
   # Backend service - FastAPI application
   backend:
@@ -23,12 +24,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: rag_backend
-    # As portas não precisam mais ser expostas para o host,
-    # pois o proxy se comunicará com ele pela rede interna do Docker.
-    # ports:
-    #  - "8000:8000"
     expose:
-      - "8000" # Apenas expõe a porta para outros contêineres na mesma rede
+      - "8000" # Exposição para comunicação interna entre serviços
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - JINA_API_KEY=${JINA_API_KEY}
@@ -56,17 +53,16 @@ services:
     networks:
       - rag_network
 
-  # Frontend service - Nginx serving static files
+  # Frontend service - Nginx para arquivos estáticos
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
     container_name: rag_frontend
-    # A porta 80 também não precisa mais ser exposta para o host.
-    # ports:
-    #  - "80:80"
     expose:
-      - "80" # Apenas expõe a porta para o proxy
+      - "80" # Exposição para comunicação interna com o proxy
+    networks:
+      - rag_network
     depends_on:
       - backend
     deploy:
@@ -82,8 +78,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    networks:
-      - rag_network
 
 networks:
   rag_network:
